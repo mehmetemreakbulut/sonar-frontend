@@ -13,15 +13,16 @@ export default function CatalogExtensionMenu(props:any) {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [selectedIndex, setSelectedIndex] = React.useState<null | number>(null);
   const [options, setOptions] = React.useState<string[]>([]);
-  const [catalogExtensions, setcatalogExtension] = React.useState<CatalogExtension[]>([]);
+  const [catalogExtensions, setcatalogExtension] = React.useState<string[]>([]);
   const open = Boolean(anchorEl);
 
   React.useEffect(() => {
-    CatalogService.getCatalogExtensions(catalog_name).then(
+    
+    CatalogService.getCatalogExtensionNames(catalog_name).then(
       (response) => {
         let catalogExtensions = response.data
         setcatalogExtension(catalogExtensions)
-        setOptions(catalogExtensions.map(v => v.catalog_extension_name))
+        setOptions(catalogExtensions.map(v => v))
       },
       error => {
         const resMessage =

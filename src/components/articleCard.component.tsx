@@ -42,7 +42,7 @@ function a11yProps(index: number) {
 }
 
 function getFieldsOfStudy(fields: string[]){
-    if(fields ===null){
+    if(fields ===null || fields===undefined){
         return <div></div>
     }
     return fields.map((field) => (
@@ -51,20 +51,29 @@ function getFieldsOfStudy(fields: string[]){
     )
   }
 function getAuthors(authors: Author[]){
-    if(authors ===null){
+    if(authors ===null || authors === undefined){
         return <div></div>
     }
-    return authors.map((author) => (
-        <Chip icon={<FaceIcon />} label={author.author_name} variant="outlined" key={author.author_id}/>
+
+    const getLabel = (author:any) => {
+      return (author.author_name===undefined)? author:author.author_name
+    }
+
+    const getKey = (author:any) => {
+      return (author.author_name===undefined) ? author : author.author_id
+    }
+    return authors.map((author:Author) => (
+        <Chip icon={<FaceIcon />} label={getLabel(author)} variant="outlined" key={getKey(author)}/>
     )
     )
   }
 
 function getPublicationTypes(types: string[]){
-    if(types ===null){
+    if(types ===null || types === undefined){
         return <div></div>
     }
-    return types.map((type) => (
+    console.log(types)
+    return types.map((type:string) => (
         <Chip label={type} color="secondary" key={type}/>
     )
     )
@@ -86,10 +95,13 @@ type ArticleProps ={
     currentCatalog: string | null
     handleCatalogAdded:any
     catalogBaseIdentifiers: string[]
+    allowUpdate: boolean
+    score?: number
 }
 
 export default function BasicTabs(props:ArticleProps) {
-  const {article, handleNoCatalogBaseSelected, currentCatalog, handleCatalogAdded, catalogBaseIdentifiers} = props
+  const {article, handleNoCatalogBaseSelected, currentCatalog, handleCatalogAdded, catalogBaseIdentifiers, allowUpdate, score} = props
+
   const [value, setValue] = React.useState(0);
   const [switchChecked, setSwitchChecked] = React.useState<boolean | null>(null);
   const [addedToCatalog, setAddedToCatalog] =  React.useState<boolean | null>(null);
@@ -172,6 +184,35 @@ export default function BasicTabs(props:ArticleProps) {
     return false
   }
 }
+  const renderSwitch = () => {
+    if (allowUpdate) {
+return <Switch
+      checked={inCatalog()}
+      onChange={handleChangeSwitch}
+      inputProps={{ 'aria-label': 'controlled' }}
+      />
+    }
+    else {
+      return <div></div>
+    }
+  }
+  const renderScore = () => {
+    if(score === undefined) {
+      return <div></div>
+    }
+    else {
+      return <Chip label={score} color="secondary"  style={{marginTop:'5px'}}/>
+    }
+  }
+  const renderScore2 = () => {
+    if(score === undefined) {
+      return <div></div>
+    }
+    else {
+      return <strong>Score:  </strong>
+    }
+  }
+  console.log(getAuthors(article.authors))
   return (
     <Box sx={{ width: '100%', transform: 'translateZ(0px)', flexGrow: 1 }}> 
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
@@ -182,17 +223,18 @@ export default function BasicTabs(props:ArticleProps) {
         
       </Box>
       <TabPanel value={value} index={0}>
-        <Chip label={article.title} color="success" variant="outlined" style={{marginTop:'5px'}}/> <br/>
-        <Chip label={article.DOI} variant="outlined" style={{marginTop:'5px'}}/> <br/>
-        <Chip label={article.publication_date} variant="outlined" color="primary" icon={<InsertInvitationIcon />} style={{marginTop:'5px'}}/>
-         <Stack direction="row" spacing={1} style={{marginTop:'5px'} }>
+        {renderScore2()}{renderScore()} <br/>
+        <strong>Title:  </strong><Chip label={article.title} color="success" variant="outlined" style={{marginTop:'5px'}}/> <br/>
+        <strong>DOI:  </strong><Chip label={article.DOI} variant="outlined" style={{marginTop:'5px'}}/> <br/>
+        <strong>Publication Date:  </strong><Chip label={article.publication_date} variant="outlined" color="primary" icon={<InsertInvitationIcon />} style={{marginTop:'5px'}}/> <br/>
+        <strong>Publication Types:  </strong><Stack direction="row" spacing={1} style={{marginTop:'5px'} }> 
         {getPublicationTypes(article.publication_types)}
-        </Stack>
-        <Stack direction="row" spacing={1} style={{marginTop:'5px'}}>
+        </Stack> <br/>
+        <strong>Fields of Study:  </strong><Stack direction="row" spacing={1} style={{marginTop:'5px'}}>
         {getFieldsOfStudy(article.fields_of_study)}
-        </Stack>
-        <Chip label={getCitationCount(article.citation_count)} color='warning' style={{marginTop:'5px'}}/> <br/>
-        <Stack direction="row" spacing={0}  style={{marginTop:'10px'}} sx={{ flexWrap: 'wrap', gap: 1, width:'85%' }} justifyContent="flex-start">
+        </Stack><br/> 
+        <strong>Citation Count:  </strong><Chip label={getCitationCount(article.citation_count)} color='warning' style={{marginTop:'5px'}}/> <br/>
+        <strong>Authors:  </strong><Stack direction="row" spacing={0}  style={{marginTop:'10px'}} sx={{ flexWrap: 'wrap', gap: 1, width:'85%' }} justifyContent="flex-start">
         {getAuthors(article.authors)}
         </Stack>
         
@@ -217,12 +259,7 @@ export default function BasicTabs(props:ArticleProps) {
           />
         ))}
       </SpeedDial>
-      <Switch
-      checked={inCatalog()}
-      onChange={handleChangeSwitch}
-      inputProps={{ 'aria-label': 'controlled' }}
-      />
-  
+      {renderSwitch()}
     </Box>
   );
 

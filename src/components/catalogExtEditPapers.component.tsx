@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Component } from 'react';
 import AuthService from "../services/auth.service";
-import CatalogService, { CatalogExtension } from "../services/catalog.service"
+import CatalogService, { ArticlePage, CatalogExtension } from "../services/catalog.service"
 import { useParams } from 'react-router-dom';
 import { Article } from '../services/search.service';
 import { ArticleIdentifier, CatalogBase } from '../services/catalog.service';
@@ -11,21 +11,47 @@ import ExtensionCard from './extensionCardComponent';
 
 type CompProps = {
     catalog_name: string
-    catalog_extension:CatalogExtension
+    catalog_extension_name:string
 }
 export default function CatalogEditExtensionPapers(props:CompProps){
 
-    const { catalog_name , catalog_extension} = props;
-    
+    const { catalog_name , catalog_extension_name} = props;
+    const [ catalog_extension , setCatalogExtension] = React.useState<ArticlePage | null>(null)
     const [catalogExtensionAdded, setcatalogExtensionAdded] = React.useState<boolean >(false);
     const [catalogExtensionRemoved, setcatalogExtensionRemoved] = React.useState<boolean >(false);
     const [ page, setPage ] = React.useState<number>(1);
 
-    
+    React.useEffect(() => {
+        console.log('render compoonent')
+        const currentUser = AuthService.getCurrentUser();
+        if (catalog_name===undefined){
+            return
+        }
+        if (catalog_extension_name===undefined){
+            return
+        }
+        CatalogService.getCatalogExtensionArticles(catalog_name,catalog_extension_name, page.toString()).then(
+      (response) => {
+        let catalogExtensionData = response.data
+        setCatalogExtension(catalogExtensionData)
+      },
+      error => {
+        const resMessage =
+          (error.response &&
+            error.response.data &&
+            error.response.data.error) ||
+          error.message ||
+          error.toString();
+      }
+    );
+},[page, props])
    
     const handlePageChange = (event: any, value:number) =>{
-        setPage(page)
+        setPage(value)
+        console.log(page)
+      
   }
+   
     
   const handleCatalogAdded = (added:boolean) => {
     if(added){
@@ -49,11 +75,11 @@ export default function CatalogEditExtensionPapers(props:CompProps){
         else{
             return (
                 <div>
-                <Pagination count={catalog_extension.article_identifiers.length} page={page} onChange={handlePageChange} style={{marginTop:'20px',marginBottom:'20px'}}/>
-                {catalog_extension.article_identifiers.map((article) => (
+                <Pagination count={catalog_extension.page_count} page={page} onChange={handlePageChange} style={{marginTop:'20px',marginBottom:'20px'}}/>
+                {catalog_extension.articles.map((article) => (
                 <ExtensionCard article={article} key={article.DOI} handleNoCatalogExtensionSelected={()=>{}} 
-                currentCatalog={catalog_name} currentExtension={catalog_extension.catalog_extension_name} handleCatalogAdded={()=>{}} 
-                catalogExtensionIdentifiers={catalog_extension.article_identifiers.map(v => v.DOI)}></ExtensionCard>
+                currentCatalog={catalog_name} currentExtension={catalog_extension_name} handleCatalogAdded={handleCatalogAdded} 
+                catalogExtensionIdentifiers={catalog_extension.articles.map(v => v.DOI)}></ExtensionCard>
                 
             ))}
 

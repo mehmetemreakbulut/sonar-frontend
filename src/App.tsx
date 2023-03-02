@@ -18,12 +18,18 @@ import EventBus from "./common/EventBus";
 import CatalogPapers from "./components/catalogPapers.component";
 import CatalogExtensionPapers from "./components/catalogExtensionPapers.component";
 import EditExtensionComponent from "./components/editExtension.component";
+import ProfileV2 from "./components/profileV2.component";
+import React from 'react';
+import ReactDOM from 'react-dom';
+import MainGraph from "./components/mainGraph";
+import AnalysisPage from "./components/analysis/analysis.component";
 
 type Props = {};
 
 type State = {
   currentUser: IUser | undefined
 }
+
 
 class App extends Component<Props, State> {
   constructor(props: Props) {
@@ -77,7 +83,7 @@ class App extends Component<Props, State> {
             {currentUser && (
               <li className="nav-item">
                 <Link to={"/user"} className="nav-link">
-                  Dashboard
+                  Search
                 </Link>
               </li>
             )}
@@ -87,9 +93,25 @@ class App extends Component<Props, State> {
             <div className="navbar-nav ml-auto">
               <li className="nav-item">
                 <Link to={"/profile"} className="nav-link">
-                  {currentUser.username}
+                  Your Profile
                 </Link>
               </li>
+              <li className="nav-item">
+                <Link to={"/mycatalogs"} className="nav-link">
+                  My Catalogs
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link to={"/mygraph"} className="nav-link">
+                  My Graph
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link to={"/analysis"} className="nav-link">
+                  Analysis
+                </Link>
+              </li>
+              
               <li className="nav-item">
                 <a href="/login" className="nav-link" onClick={this.logOut}>
                   LogOut
@@ -119,7 +141,12 @@ class App extends Component<Props, State> {
             <Route path={"/"} element={<Home/>} />
             <Route path="/login" element={<Login/>} />
             <Route path="/register" element={<Register/>} />
-            <Route path="/profile" element={<Profile/>} />
+            <Route path="/profile" element={<ProfileV2/>} />
+            <Route path="/mycatalogs" element={<Profile/>} />
+            <Route path="/mygraph" element={<MainGraph/>} />
+            <Route path="/analysis" element={<AnalysisPage/>} />
+            
+            
             <Route path="/user" element={<BoardUser/>} />
             <Route path="/catalogPapers/:catalog_name" element={<CatalogPapers/>} />
             <Route path="/catalogPapers/:catalog_name/:catalog_extension_name" element={<CatalogExtensionPapers/>} />

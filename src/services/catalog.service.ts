@@ -1,8 +1,7 @@
-import { SwapVerticalCircle } from '@mui/icons-material';
-import { StepIconClassKey } from '@mui/material';
+
 import axios from 'axios';
 import authHeader from './authHeader';
-import { Article } from './search.service';
+import { Article, Author } from './search.service';
 
 const API_URL = 'http://localhost:8000/catalog/';
 
@@ -27,13 +26,33 @@ export type CatalogExtension = {
     article_identifiers:  Article[]
 }
 
+export type AuthorPage = {
+    authors : Author[]
+    total_count : number
+    page_count : number
+}
+
+export type ArticlePage = {
+    articles : Article[]
+    total_count : number
+    page_count : number
+}
 class CatalogService {
     
     getCatalogBase(catalog_name: string){
+        
         return axios.get<CatalogBase>(API_URL + 'base/?catalog_name='+catalog_name, { headers: authHeader() })
     }
     getCatalogExtension(catalog_name: string, catalog_extension_id:string){
         return axios.get<CatalogExtension>(API_URL + 'extension/?catalog_name='+catalog_name+'&catalog_extension_name='+catalog_extension_id, { headers: authHeader() })
+    }
+    
+    getCatalogBaseArticles(catalog_name: string,  offset:string){
+        return axios.get<ArticlePage>(API_URL + 'base/articles/?catalog_name='+catalog_name+'&offset='+offset, { headers: authHeader() })
+    }
+
+    getCatalogExtensionArticles(catalog_name: string, catalog_extension_id:string, offset:string){
+        return axios.get<ArticlePage>(API_URL + 'extension/articles/?catalog_name='+catalog_name+'&catalog_extension_name='+catalog_extension_id+'&offset='+offset, { headers: authHeader() })
     }
     createCatalogBase(catalog_name: string) {
     var bodyFormData = new FormData();
@@ -46,11 +65,16 @@ class CatalogService {
     }
 
     getAllCatalogBases() {
+        console.log(authHeader())
         return axios.get<CatalogBase[]>(API_URL + 'base/all/', { headers: authHeader() });
     }
 
     getCatalogExtensions(catalog_name: string) {
         return axios.get<CatalogExtension[]>(API_URL + 'extension/all/?catalog_name='+catalog_name, { headers: authHeader() });
+    }
+
+    getCatalogExtensionNames(catalog_name: string) {
+        return axios.get<string[]>(API_URL + 'extension/names/?catalog_name='+catalog_name, { headers: authHeader() });
     }
 
     addPaperDOIToBase(catalog_name: string,article: Article) {
@@ -84,7 +108,7 @@ class CatalogService {
     }
 
     addPaperDOIToExtension(catalog_name: string,catalog_extension_name:string, article: Article) {
-    
+        console.log("aaa")
         const data = {
             catalog_name: catalog_name,
             catalog_extension_name:catalog_extension_name,
@@ -109,7 +133,7 @@ class CatalogService {
         const data = {
             catalog_name: catalog_name,
             catalog_extension_name:catalog_extension_name,
-            edit_type: "remove_paper_doi",
+            edit_type: "remove_s2ag_paper_id",
             paper_doi: paper_doi
         }
         return axios.put(API_URL + 'extension/', data, { headers: authHeader() });

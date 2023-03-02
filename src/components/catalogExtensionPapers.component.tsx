@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Component } from 'react';
 import AuthService from "../services/auth.service";
-import CatalogService, { CatalogExtension } from "../services/catalog.service"
+import CatalogService, { ArticlePage, CatalogExtension } from "../services/catalog.service"
 import { useParams } from 'react-router-dom';
 import { Article } from '../services/search.service';
 import { ArticleIdentifier, CatalogBase } from '../services/catalog.service';
@@ -12,7 +12,7 @@ import ExtensionCard from './extensionCardComponent';
 export default function CatalogExtensionPapers(){
 
     const { catalog_name , catalog_extension_name} = useParams();
-    const [catalogExtension, setCatalogExtension] = React.useState<CatalogExtension | null>(null);
+    const [catalogExtension, setCatalogExtension] = React.useState<ArticlePage | null>(null);
     const [catalogExtensionAdded, setcatalogExtensionAdded] = React.useState<boolean >(false);
     const [catalogExtensionRemoved, setcatalogExtensionRemoved] = React.useState<boolean >(false);
     const [ page, setPage ] = React.useState<number>(1);
@@ -25,7 +25,7 @@ export default function CatalogExtensionPapers(){
         if (catalog_extension_name===undefined){
             return
         }
-        CatalogService.getCatalogExtension(catalog_name,catalog_extension_name).then(
+        CatalogService.getCatalogExtensionArticles(catalog_name,catalog_extension_name, page.toString()).then(
       (response) => {
         let catalogExtensionData = response.data
         setCatalogExtension(catalogExtensionData)
@@ -39,10 +39,12 @@ export default function CatalogExtensionPapers(){
           error.toString();
       }
     );
-},[])
+},[page])
    
     const handlePageChange = (event: any, value:number) =>{
-        setPage(page)
+        setPage(value)
+        console.log(page)
+      
   }
     
   const handleCatalogAdded = (added:boolean) => {
@@ -60,18 +62,18 @@ export default function CatalogExtensionPapers(){
     setcatalogExtensionAdded(false)
   };
     const renderArticles = () =>{
-        if(catalog_name===undefined || catalogExtension===null){
+        if(catalog_name===undefined || catalogExtension===null || catalog_extension_name==null){
             return <div></div>
         }
         
         else{
             return (
                 <div>
-                <Pagination count={catalogExtension.article_identifiers.length} page={page} onChange={handlePageChange} style={{marginTop:'20px',marginBottom:'20px'}}/>
-                {catalogExtension.article_identifiers.map((article) => (
+                <Pagination count={catalogExtension.page_count} page={page} onChange={handlePageChange} style={{marginTop:'20px',marginBottom:'20px'}}/>
+                {catalogExtension.articles.map((article) => (
                 <ExtensionCard article={article} key={article.DOI} handleNoCatalogExtensionSelected={()=>{}} 
-                currentCatalog={catalog_name} currentExtension={catalogExtension.catalog_extension_name} handleCatalogAdded={()=>{}} 
-                catalogExtensionIdentifiers={catalogExtension.article_identifiers.map(v => v.DOI)}></ExtensionCard>
+                currentCatalog={catalog_name} currentExtension={catalog_extension_name} handleCatalogAdded={()=>{}} 
+                catalogExtensionIdentifiers={catalogExtension.articles.map(v => v.DOI)}></ExtensionCard>
                 
             ))}
 

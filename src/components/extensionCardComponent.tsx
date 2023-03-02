@@ -102,6 +102,7 @@ export default function ExtensionCard(props:ArticleProps) {
 
   
   const handleChangeSwitch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log("test")
     if(!switchChecked){
       if (currentExtension===null || currentCatalog===null){
       handleNoCatalogExtensionSelected()
@@ -110,6 +111,7 @@ export default function ExtensionCard(props:ArticleProps) {
   else{
     CatalogService.addPaperDOIToExtension(currentCatalog, currentExtension, article).then(
         (response) => {
+        console.log("HERE")
         setAddedToCatalog(true);
         handleCatalogAdded(true)
         setSwitchChecked(true)
@@ -128,13 +130,14 @@ export default function ExtensionCard(props:ArticleProps) {
   
     }
     else{
-      if (currentExtension===null){
+      if (currentExtension===null || currentCatalog == null){
       handleNoCatalogExtensionSelected()
       return
     }
   else{
-    CatalogService.removePaperDOIFromBase(currentExtension, article.DOI).then(
+    CatalogService.removePaperDOIFromExtension(currentCatalog,currentExtension, article.DOI).then(
         (response) => {
+          console.log('removing')
         setRemovedFromCatalog(true);
         handleCatalogAdded(false)
         setSwitchChecked(false)

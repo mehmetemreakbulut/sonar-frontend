@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Component } from 'react';
 import AuthService from "../services/auth.service";
-import CatalogService from "../services/catalog.service"
+import CatalogService, { ArticlePage } from "../services/catalog.service"
 import { useParams } from 'react-router-dom';
 import { Article } from '../services/search.service';
 import { ArticleIdentifier, CatalogBase } from '../services/catalog.service';
@@ -11,7 +11,7 @@ import BasicTabs from "./articleCard.component";
 export default function CatalogPapers(){
 
     const { catalog_name } = useParams();
-    const [catalogBase, setCatalogBase] = React.useState<Article[]>([]);
+    const [catalogBase, setCatalogBase] = React.useState<ArticlePage | null>(null);
     const [ page, setPage ] = React.useState<number>(1);
 
     React.useEffect(() => {
@@ -19,9 +19,9 @@ export default function CatalogPapers(){
         if (catalog_name===undefined){
             return
         }
-        CatalogService.getCatalogBase(catalog_name).then(
+        CatalogService.getCatalogBaseArticles(catalog_name, page.toString()).then(
       (response) => {
-        let catalogBaseData = response.data.article_identifiers
+        let catalogBaseData = response.data
         setCatalogBase(catalogBaseData)
       },
       error => {
@@ -44,19 +44,25 @@ export default function CatalogPapers(){
             return <div></div>
         }
         else{
+
+            if (catalogBase == null) {
+                return <div></div>
+            } 
             return (
+                
                 <div>
-                {catalogBase.map((article) => (
+                <Pagination count={catalogBase.page_count} page={page} onChange={handlePageChange} style={{marginTop:'20px',marginBottom:'20px'}}/>
+                {catalogBase.articles.map((article) => (
                 <BasicTabs article={article} key={article.DOI} handleNoCatalogBaseSelected={()=>{}} 
                 currentCatalog={catalog_name} handleCatalogAdded={()=>{}} 
-                catalogBaseIdentifiers={catalogBase.map(v => v.DOI)}></BasicTabs>
+                catalogBaseIdentifiers={catalogBase.articles.map(v => v.DOI)} allowUpdate={true}></BasicTabs>
             ))}
             </div>
             )
         }
     }
-    return ( <div>
-        <Pagination count={catalogBase.length} page={page} onChange={handlePageChange} style={{marginTop:'20px',marginBottom:'20px'}}/>
+    return ( 
+    <div>
         {renderArticles()}
     </div> );
   

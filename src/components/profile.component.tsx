@@ -6,10 +6,11 @@ import AuthService from "../services/auth.service";
 import IUser from "../types/user.type";
 import Dialog from "@mui/material/Dialog";
 import { DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from "@mui/material";
-
+import GraphService from '../services/graph.services'
 import CatalogService from "../services/catalog.service"
 import type {CatalogBase} from "../services/catalog.service"
 import ControlledAccordions from "./catalogs.component";
+import CatalogExtensionMenu from "./catalogExtensionList.component";
 type Props = {};
 
 type State = {
@@ -24,6 +25,9 @@ type State = {
   mode:number
   catalogExtensionParent: string | null
   extensionChange:boolean
+  graph_build_name: string | null
+  graph_extension_name: string | null
+  graph_build_bool: boolean
 }
 export default class Profile extends Component<Props, State> {
   constructor(props: Props) {
@@ -40,7 +44,10 @@ export default class Profile extends Component<Props, State> {
       catalogBases: [],
       mode: 1,
       catalogExtensionParent: "",
-      extensionChange: false
+      extensionChange: false,
+      graph_build_name: null,
+      graph_extension_name: null,
+      graph_build_bool: false
     };
   }
 
@@ -134,35 +141,57 @@ export default class Profile extends Component<Props, State> {
   extensionChangeHandle =(exist:boolean) => {
     this.setState({extensionChange:exist})
   }
+  handleBuildGraph = () => {
+    if ( this.state.graph_build_name === null || this.state.graph_extension_name === null) {
+      return
+    }
+    GraphService.buildGraph(this.state.graph_build_name, this.state.graph_extension_name).then(
+      (response) => {
+   
+        this.setState({isSuccess: true})
+      },
+      error => {
+        const resMessage =
+          (error.response &&
+            error.response.data &&
+            error.response.data.error) ||
+          error.message ||
+          error.toString();
+          console.log(resMessage)
+          this.setState({isSuccess: false})
+          
+      }
+    );
+  }
+
+ handleBuildGraphPopup = (catalog_name: string) => () => {
+  
+    this.setState({ graph_build_name: catalog_name});
+    this.setState({graph_build_bool: true})
+  }
+  handleBuildPopupClose = () => {
+    this.setState({ graph_build_name: null});
+    this.setState({ graph_extension_name: null});
+    this.setState({graph_build_bool: false})
+    this.setState({ isSuccess: null});
+  }
+  handleExtensionForBuild = (catalog_extension_name:string, catalog_extension:string) => {
+    this.setState({ graph_extension_name: catalog_extension});
+  }
+  
+ 
   render() {
     if (this.state.redirect) {
       return <Navigate to={this.state.redirect} />
     }
-
+    console.log("he")
     const { currentUser } = this.state;
 
     return (
       <div className="container">
         {(this.state.userReady) ?
           <div>
-            <header className="jumbotron">
-              <h3>
-                <strong>{currentUser.username}</strong> Profile
-              </h3>
-            </header>
-            <p>
-              <strong>Token:</strong>{" "}
-              {currentUser.token.substring(0, 20)} ...{" "}
-              {currentUser.token.substr(currentUser.token.length - 20)}
-            </p>
-            <p>
-              <strong>Id:</strong>{" "}
-              {currentUser.id}
-            </p>
-            <p>
-              <strong>Email:</strong>{" "}
-              {currentUser.email}
-            </p>
+            
             <Button variant="outlined" startIcon={<AddIcon />} onClick={this.handleClickOpen(1, null)}>
             Add Catalog Base
             </Button>
@@ -170,7 +199,12 @@ export default class Profile extends Component<Props, State> {
       <DialogTitle>{(this.state.mode===1) ? "Name your Catalog Base!" : "Are you sure?"}</DialogTitle>
       {(this.state.mode===1) ? renderCatalogBaseCreate(this.state.isSuccess, this.onSearchInputChange, this.handleCreateCatalog): renderCatalogExtensionCreate(this.state.isSuccess, this.state.catalogExtensionParent, this.handleCreateExtension, this.handleClose, this.onExtensionInputChange)}
     </Dialog>
-    <ControlledAccordions catalogBases={this.state.catalogBases} catalogExtensions={[]} handleClickOpen={this.handleClickOpen} extensionChangeHandle={this.extensionChangeHandle} extensionChange={this.state.extensionChange}></ControlledAccordions>
+    <Dialog onClose={this.handleBuildPopupClose} open={this.state.graph_build_bool == true}>
+      <DialogTitle>{"Please choose an extension for catalog base" + this.state.graph_build_name}</DialogTitle>
+       {renderBuildGraph(this.state.isSuccess, this.handleBuildGraph, this.handleExtensionForBuild, this.state.graph_build_name)}
+       </Dialog>
+    
+    <ControlledAccordions catalogBases={this.state.catalogBases} catalogExtensions={[]} handleClickOpen={this.handleClickOpen} extensionChangeHandle={this.extensionChangeHandle} extensionChange={this.state.extensionChange} handleBuildGraphPopup={this.handleBuildGraphPopup}></ControlledAccordions>
           </div>
            : null}
           
@@ -178,7 +212,33 @@ export default class Profile extends Component<Props, State> {
     );
   }
 }
-
+function renderBuildGraph(isSuccess:boolean|null, handleBuildGraph: any,handleExtensionForBuild: any, catalog_name: string | null) {
+  if (catalog_name == null) {
+    return <div></div>
+  }
+  return (
+        <div className="container">
+          <CatalogExtensionMenu handleCatalogExtensionSelection={handleExtensionForBuild} catalog_name={catalog_name.toString()}/> 
+        <div className="input-group" style={{padding:'10px'}}>
+          <button type="button" className="btn btn-outline-primary" onClick={handleBuildGraph}>Add</button>
+        </div>
+        {isSuccess && (
+                <div className="form-group" style={{paddingTop: '10px'}}>
+                  <div className="alert alert-success" role="alert">
+                    Successfully created.
+                  </div>
+                </div>
+              )}
+        {isSuccess===false && (
+                <div className="form-group" style={{paddingTop: '10px'}}>
+                  <div className="alert alert-danger" role="alert">
+                    Graph not created!
+                  </div>
+                </div>
+              )}
+      </div>
+    )
+}
 function renderCatalogBaseCreate(isSuccess:boolean|null,onSearchInputChange:any, handleCreateCatalog:any){
     return (
         <div className="container">

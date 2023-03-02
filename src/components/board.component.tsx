@@ -167,7 +167,7 @@ export default class BoardUser extends Component<Props, State> {
       <Pagination count={content.total_page_count} page={page} onChange={this.handlePageChange} style={{marginTop:'20px',marginBottom:'20px'}}/>
       <CatalogBaseMenu handleCatalogSelection={this.handleCatalogSelection}/>
       {articles.map((article) => (
-        <BasicTabs article={article} key={article.DOI} handleNoCatalogBaseSelected={this.handleNoCatalogBaseSelected} currentCatalog={this.state.currentCatalog} handleCatalogAdded={this.handleCatalogAdded} catalogBaseIdentifiers={this.state.catalogBaseIdentifiers.map(v => v.DOI)}></BasicTabs>
+        <BasicTabs article={article} key={article.DOI} handleNoCatalogBaseSelected={this.handleNoCatalogBaseSelected} currentCatalog={this.state.currentCatalog} handleCatalogAdded={this.handleCatalogAdded} catalogBaseIdentifiers={this.state.catalogBaseIdentifiers.map(v => v.DOI)} allowUpdate={true}></BasicTabs>
       ))}
       {this.state.noCurrentCatalog ? <Snackbar open={this.state.openAlert} autoHideDuration={6000} onClose={this.handleClose}>
         <Alert onClose={this.handleClose} severity="error" sx={{ width: '100%' }}>

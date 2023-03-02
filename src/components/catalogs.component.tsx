@@ -6,13 +6,16 @@ import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { CatalogBase, CatalogExtension } from '../services/catalog.service';
 import CatalogService from '../services/catalog.service'
+import GraphService from '../services/graph.services'
 import { Button, Chip, Stack } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 
 export default function ControlledAccordions(props: any) {
   const catalogBases = props.catalogBases
-  
   const [expanded, setExpanded] = React.useState<string | false>(false);
+  const [graphBuildName, setGraphBuildName] = React.useState<string | null>(null);
+  const [buildOpen , setBuildOpen] = React.useState<boolean>(false)
+  const [selectedExtension , setSelectedExtension] = React.useState<string | null >(null)
 
   const [[catalogName,catalogExtensions], setCatalogExtensions] = React.useState<[string|null,CatalogExtension[]]>([null,[]]);
  
@@ -97,6 +100,10 @@ export default function ControlledAccordions(props: any) {
             <a href={`/catalogPapers/edit/${catalogBase.catalog_name}`}>
             <Button style={{marginLeft:"10px"}} variant="outlined" startIcon={<AddIcon />} >
             Edit Extensions
+            </Button></a>
+            <a >
+            <Button style={{marginLeft:"10px"}} variant="outlined" startIcon={<AddIcon />} onClick={props.handleBuildGraphPopup(catalogBase.catalog_name)}>
+            Build Graph
             </Button></a></Typography>
         </AccordionSummary>
         <AccordionDetails>
