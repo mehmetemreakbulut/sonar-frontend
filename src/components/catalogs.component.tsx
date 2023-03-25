@@ -4,10 +4,10 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { CatalogBase, CatalogExtension } from '../services/catalog.service';
+import { CatalogBase, CatalogBaseForList, CatalogExtension } from '../services/catalog.service';
 import CatalogService from '../services/catalog.service'
 import GraphService from '../services/graph.services'
-import { Button, Chip, Stack } from '@mui/material';
+import { Button, Card, CardContent, Chip, Stack, Tooltip } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 
 export default function ControlledAccordions(props: any) {
@@ -17,14 +17,14 @@ export default function ControlledAccordions(props: any) {
   const [buildOpen , setBuildOpen] = React.useState<boolean>(false)
   const [selectedExtension , setSelectedExtension] = React.useState<string | null >(null)
 
-  const [[catalogName,catalogExtensions], setCatalogExtensions] = React.useState<[string|null,CatalogExtension[]]>([null,[]]);
+  const [[catalogName,catalogExtensions], setCatalogExtensions] = React.useState<[string|null,string[]]>([null,[]]);
  
 
   React.useEffect(() => {
     console.log(props.extensionChange, expanded)
   if(props.extensionChange && expanded!==false){
     console.log("jann", expanded)
-    CatalogService.getCatalogExtensions(expanded).then(
+    CatalogService.getCatalogExtensionNames(expanded).then(
     (response) => {
 
     setCatalogExtensions([expanded,response.data])
@@ -48,7 +48,7 @@ export default function ControlledAccordions(props: any) {
       console.log(panel,catalogName,props.extensionChange)
       if(panel!==catalogName || (props.extensionChange)){
       setCatalogExtensions([panel,[]])
-      CatalogService.getCatalogExtensions(panel).then(
+      CatalogService.getCatalogExtensionNames(panel).then(
       (response) => {
    
         setCatalogExtensions([panel,response.data])
@@ -69,47 +69,45 @@ export default function ControlledAccordions(props: any) {
       props.extensionChangeHandle(false)
       
     };
-    const getExtensions = (extensions: CatalogExtension[], catalog_name: string)=>{
+    const getExtensions = (extensions: string[], catalog_name: string)=>{
     
         return extensions.map((extension, index) => (
-            <a href={`/catalogPapers/${catalog_name}/${extension.catalog_extension_name}`}>
-            <Chip label={extension.catalog_extension_name} variant="outlined" key={index} color="primary"/>
+            <a href={`/catalogPapers/${catalog_name}/${extension}`}>
+            <Chip label={extension} variant="outlined" key={index} color="primary"/>
             </a>
         )
     )
   }
 
   
-  const renderCatalogBases = (catalogBases:CatalogBase[]) =>{
+  const renderCatalogBases = (catalogBases:CatalogBaseForList[]) =>{
       return catalogBases.map(catalogBase=>
-        <Accordion key={catalogBase.catalog_name} expanded={expanded === catalogBase.catalog_name} onChange={handleChange(catalogBase.catalog_name)}>
+        <Accordion key={catalogBase.catalog_base_name} expanded={expanded === catalogBase.catalog_base_name} onChange={handleChange(catalogBase.catalog_base_name)}>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
-          aria-controls={catalogBase.catalog_name + "bh-content"}
-          id={catalogBase.catalog_name + "bh-header"}
+          aria-controls={catalogBase.catalog_base_name + "bh-content"}
+          id={catalogBase.catalog_base_name + "bh-header"}
         >
           <Typography sx={{ width: '33%', flexShrink: 0 }}>
-            {catalogBase.catalog_name}
+            {catalogBase.catalog_base_name} <Tooltip title="Paper Count"><Chip label={catalogBase.article_count} color="primary" variant="outlined"  style={{marginLeft:"10px"}}/></Tooltip>
           </Typography>
-          <Typography sx={{ color: 'text.secondary' }}><Button variant="outlined" startIcon={<AddIcon />} onClick={props.handleClickOpen(2, catalogBase.catalog_name)}>
-            Add Catalog Extension</Button>
-            <a href={`/catalogPapers/${catalogBase.catalog_name}`}>
-            <Button style={{marginLeft:"10px"}} variant="outlined" startIcon={<AddIcon />} >
+            <a href={`/catalogPapers/${catalogBase.catalog_base_name}`}>
+            <Button variant="outlined" startIcon={<AddIcon />} >
             Show Papers
             </Button></a>
-            <a href={`/catalogPapers/edit/${catalogBase.catalog_name}`}>
+
+          <Typography style={{marginLeft:"10px"}} sx={{ color: 'text.secondary' }}><Button variant="outlined" startIcon={<AddIcon />} onClick={props.handleClickOpen(2, catalogBase.catalog_base_name)}>
+            Create Catalog Extension</Button>
+            <a href={`/catalogPapers/edit/${catalogBase.catalog_base_name}`}>
             <Button style={{marginLeft:"10px"}} variant="outlined" startIcon={<AddIcon />} >
             Edit Extensions
             </Button></a>
-            <a >
-            <Button style={{marginLeft:"10px"}} variant="outlined" startIcon={<AddIcon />} onClick={props.handleBuildGraphPopup(catalogBase.catalog_name)}>
-            Build Graph
-            </Button></a></Typography>
+            </Typography>
         </AccordionSummary>
         <AccordionDetails>
   
             <Stack direction="row" spacing={0}  sx={{ flexWrap: 'wrap', gap: 1, width:'85%' }} justifyContent="flex-start">
-        {getExtensions(catalogExtensions,catalogBase.catalog_name)}
+        {getExtensions(catalogExtensions,catalogBase.catalog_base_name)}
         </Stack>
             
           

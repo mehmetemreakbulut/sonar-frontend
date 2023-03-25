@@ -5,12 +5,13 @@ import AddIcon from '@mui/icons-material/Add';
 import AuthService from "../services/auth.service";
 import IUser from "../types/user.type";
 import Dialog from "@mui/material/Dialog";
-import { DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from "@mui/material";
+import { Card, CardContent, Checkbox, Chip, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, TextField, Typography } from "@mui/material";
 import GraphService from '../services/graph.services'
-import CatalogService from "../services/catalog.service"
+import CatalogService, { CatalogBaseForList } from "../services/catalog.service"
 import type {CatalogBase} from "../services/catalog.service"
 import ControlledAccordions from "./catalogs.component";
 import CatalogExtensionMenu from "./catalogExtensionList.component";
+import CommentIcon from '@mui/icons-material/Comment';
 type Props = {};
 
 type State = {
@@ -21,13 +22,14 @@ type State = {
   catalogName: string | null
   catalogExtensionName: string | null
   isSuccess:boolean | null
-  catalogBases: CatalogBase[]
+  catalogBases: CatalogBaseForList[]
   mode:number
   catalogExtensionParent: string | null
   extensionChange:boolean
   graph_build_name: string | null
   graph_extension_name: string | null
   graph_build_bool: boolean
+  checked: number[]
 }
 export default class Profile extends Component<Props, State> {
   constructor(props: Props) {
@@ -47,10 +49,25 @@ export default class Profile extends Component<Props, State> {
       extensionChange: false,
       graph_build_name: null,
       graph_extension_name: null,
-      graph_build_bool: false
+      graph_build_bool: false,
+      checked: [0]
     };
   }
 
+   
+
+  handleToggle = (value: number) => () => {
+    const currentIndex = this.state.checked.indexOf(value);
+    const newChecked = [...this.state.checked];
+
+    if (currentIndex === -1) {
+      newChecked.push(value);
+    } else {
+      newChecked.splice(currentIndex, 1);
+    }
+
+    this.setState({checked:newChecked});
+  };
   componentDidMount() {
     const currentUser = AuthService.getCurrentUser();
 
@@ -191,13 +208,37 @@ export default class Profile extends Component<Props, State> {
       <div className="container">
         {(this.state.userReady) ?
           <div>
-            
-            <Button variant="outlined" startIcon={<AddIcon />} onClick={this.handleClickOpen(1, null)}>
-            Add Catalog Base
+                  <div >
+        <Card style={{minWidth:"275", marginBottom:"20px"}}>
+      <CardContent>
+        <Typography variant="h5" component="h2">
+          Catalog Base
+        </Typography>
+        <Typography style={{marginBottom:"12"}} color="textSecondary">
+          Catalog Base is the main catalog that you can create extensions from. You can add papers to catalog base via search page.
+        </Typography>
+  
+      </CardContent>
+      <CardContent>
+        <Typography variant="h5" component="h2">
+          Catalog Extension
+        </Typography>
+        <Typography style={{marginBottom:"12"}} color="textSecondary">
+          Catalog Extension is the catalog that you can create from catalog base. You can add papers to catalog extension via 'Edit Extensions'. Adding citations or references options are available now!
+        </Typography>
+  
+      </CardContent>
+    </Card>
+      <Divider>
+    <Chip label="CATALOGS" />
+  </Divider>
+      </div>
+            <Button variant="outlined" startIcon={<AddIcon />} onClick={this.handleClickOpen(1, null)} style={{marginBottom:"20px"}}>
+            Create Catalog Base
             </Button>
             <Dialog onClose={this.handleClose} open={this.state.isOpen}>
       <DialogTitle>{(this.state.mode===1) ? "Name your Catalog Base!" : "Are you sure?"}</DialogTitle>
-      {(this.state.mode===1) ? renderCatalogBaseCreate(this.state.isSuccess, this.onSearchInputChange, this.handleCreateCatalog): renderCatalogExtensionCreate(this.state.isSuccess, this.state.catalogExtensionParent, this.handleCreateExtension, this.handleClose, this.onExtensionInputChange)}
+      {(this.state.mode===1) ? renderCatalogBaseCreate(this.state.isSuccess, this.onSearchInputChange, this.handleCreateCatalog): renderCatalogExtensionCreate(this.state.isSuccess, this.state.catalogExtensionParent, this.handleCreateExtension, this.handleClose, this.onExtensionInputChange, this.state.checked, this.handleToggle)}
     </Dialog>
     <Dialog onClose={this.handleBuildPopupClose} open={this.state.graph_build_bool == true}>
       <DialogTitle>{"Please choose an extension for catalog base" + this.state.graph_build_name}</DialogTitle>
@@ -264,22 +305,59 @@ function renderCatalogBaseCreate(isSuccess:boolean|null,onSearchInputChange:any,
     )
 }
 
-function renderCatalogExtensionCreate(isSuccess:boolean|null,  catalogExtensionParent:string|null,  handleCreateExtension:any, handleClose:any, onExtensionInputChange:any){
+function renderCatalogExtensionCreate(isSuccess:boolean|null,  catalogExtensionParent:string|null,  handleCreateExtension:any, handleClose:any, onExtensionInputChange:any, checked:any, handleToggle:any){
+    let optionMap = new Map();
+    optionMap.set(0, "Add articles citing papers in my catalog base");
+    optionMap.set(1, "Add articles cited by articles in my catalog base");
+    optionMap.set(2, "add articles written by authors of the articles in my catalog");
     return (
         <div className="container">
         <DialogTitle id="alert-dialog-title">
           
         </DialogTitle>
         <DialogContent>
-          <DialogContentText id="alert-dialog-description">
+          <DialogContentText id="alert-dialog-description" style={{'padding':'12px'}}>
             A catalog extension will be created for Catalog <strong>{catalogExtensionParent} </strong>!
           </DialogContentText>
-          <input type="search" className="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" onChange={onExtensionInputChange}/>
+   
+          <input style={{borderWidth:'medium'}} type="search" className="form-control rounded" placeholder="Write name of catalog extension" aria-label="Search"  onChange={onExtensionInputChange}/>
+       
+
         </DialogContent>
+        <List sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}>
+      {[0, 1, 2].map((value) => {
+        const labelId = `checkbox-list-label-${value}`;
+
+        return (
+          <ListItem
+            key={value}
+            secondaryAction={
+              <IconButton edge="end" aria-label="comments">
+                <CommentIcon />
+              </IconButton>
+            }
+            disablePadding
+          >
+            <ListItemButton role={undefined} onClick={handleToggle(value)} dense>
+              <ListItemIcon>
+                <Checkbox
+                  edge="start"
+                  checked={checked.indexOf(value) !== -1}
+                  tabIndex={-1}
+                  disableRipple
+                  inputProps={{ 'aria-labelledby': labelId }}
+                />
+              </ListItemIcon>
+              <ListItemText id={labelId} primary={optionMap.get(value)} />
+            </ListItemButton>
+          </ListItem>
+        );
+      })}
+    </List>
         <DialogActions>
-          <Button onClick={handleClose}>Disagree</Button>
+          <Button onClick={handleClose}>Cancel</Button>
           <Button onClick={handleCreateExtension} autoFocus>
-            Agree
+            CREATE
           </Button>
         </DialogActions>
         {isSuccess && (

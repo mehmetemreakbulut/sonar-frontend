@@ -45,7 +45,7 @@ code {
   --secondaryBackgroundColor: var(--secondaryDarkBackground);
   --buttonBackgroundColor: var(--primaryBackgroundColor);
   --hoverBackgroundColor: var(--hoverDarkBackground);
-  --fontColor: var(--whiteText);
+  --fontColor: white;
   --borderColor: var(--darkBorder);
 }
 
@@ -204,7 +204,7 @@ input:focus {
   font-size: x-small;
   text-align: left;
   padding: 10px 15px;
-  background-color: var(--secondaryBackgroundColor);
+  background-color: rgb(228, 23, 23);
   height: 85%;
   overflow: scroll;
 }
@@ -223,7 +223,7 @@ input:focus {
   margin: 2.5% 25%;
   padding: 10px 15px;
   border: 1px solid var(--borderColor);
-  background-color: var(--secondaryBackgroundColor);
+  background-color: rgb(121, 16, 16);
   font-size: small;
   list-style-type: none;
   overflow: scroll;
@@ -233,7 +233,7 @@ input:focus {
 #wikipedia-summaries {
   margin: 2.5% 10%;
   height: 80%;
-  background-color: var(--primaryBackgroundColor);
+  background-color: white;
 }
 
 #wikipedia-summary-tabs {
@@ -242,8 +242,6 @@ input:focus {
   text-align: left;
   height: 2.5em;
   scrollbar-width: none; /* disable scroll bar on firefox */
-  mask-image: linear-gradient(to right, black 85%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
 }
 
 /* disable scroll bar on gchrome */
@@ -256,7 +254,7 @@ input:focus {
   margin: 8px 8px -1px 0;
   padding: 5px 5px;
   border: 1px solid var(--borderColor);
-  background-color: var(--primaryBackgroundColor);
+  background-color: white;
   border-radius: 8px 8px 0 0;
   cursor: pointer;
   font-size: small;
@@ -268,7 +266,7 @@ input:focus {
   font-size: x-small;
   text-align: left;
   padding: 10px 15px;
-  background-color: var(--secondaryBackgroundColor);
+  background-color: rgb(196, 165, 198), transparent 100%;
   height: 80%;
   overflow: scroll;
 }
@@ -276,7 +274,7 @@ input:focus {
 .tab-selected {
   margin-bottom: -4px;
   box-shadow: 0 0 3px 0 var(--borderColor);
-  background-color: var(--secondaryBackgroundColor);
+  background-color: white;
 }
 
 .close-tab {
@@ -289,7 +287,7 @@ input:focus {
 
 /* ----- search bar ----- */
 .search-bar {
-  float: left;
+  float: right;
   width: 95%;
   position: absolute;
   bottom: 5%;

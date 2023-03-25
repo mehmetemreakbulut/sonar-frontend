@@ -40,9 +40,9 @@ interface VisEvents {
 
 const CONTAINER_ID = "vis";
 const NEO4J_DB = "neo4j";
-const NEO4J_URI = "bolt://localhost:7687";
+const NEO4J_URI = "bolt://159.89.27.227:7687";
 const NEO4J_USER = "neo4j";
-const NEO4J_PASSWORD = "6BqHvht5";
+const NEO4J_PASSWORD = "erdemnacar";
 
 export class VisNetwork implements VisNetworkEvents {
     constructor(private readonly network: Network) {}

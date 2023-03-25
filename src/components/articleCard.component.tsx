@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { Article, Author } from '../services/search.service';
-import { Chip, Stack, Box, Typography, Tab,Tabs, Button, SpeedDial, SpeedDialIcon, SpeedDialAction, speedDialActionClasses, Switch } from '@mui/material';
+import { Chip, Stack, Box, Typography, Tab,Tabs, Button, SpeedDial, SpeedDialIcon, SpeedDialAction, speedDialActionClasses, Switch, FormControlLabel, styled, CircularProgress } from '@mui/material';
 import FaceIcon from '@mui/icons-material/Face';
 import AddIcon from '@mui/icons-material/Add';
 import InsertInvitationIcon from '@mui/icons-material/InsertInvitation';
 import FileCopyIcon from '@mui/icons-material/FileCopyOutlined';
-
+import LoadingButton from './loadingButton.component';
 import CatalogService, { ArticleIdentifier } from '../services/catalog.service'
 
 type TabPanelProps= {
@@ -98,6 +98,54 @@ type ArticleProps ={
     allowUpdate: boolean
     score?: number
 }
+const MaterialUISwitch = styled(Switch)(({ theme }) => ({
+  width: 62,
+  height: 34,
+  padding: 7,
+  '& .MuiSwitch-switchBase': {
+    margin: 1,
+    padding: 0,
+    transform: 'translateX(6px)',
+    '&.Mui-checked': {
+      color: '#fff',
+      transform: 'translateX(22px)',
+      '& .MuiSwitch-thumb:before': {
+              content: "''",
+      position: 'absolute',
+      width: '100%',
+      height: '100%',
+      left: 0,
+      top: 0,
+      backgroundRepeat: 'no-repeat',
+      backgroundPosition: 'center',
+      backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 20 20"><path fill="${encodeURIComponent(
+        '#fff',
+      )}" d="M9.305 1.667V3.75h1.389V1.667h-1.39zm-4.707 1.95l-.982.982L5.09 6.072l.982-.982-1.473-1.473zm10.802 0L13.927 5.09l.982.982 1.473-1.473-.982-.982zM10 5.139a4.872 4.872 0 00-4.862 4.86A4.872 4.872 0 0010 14.862 4.872 4.872 0 0014.86 10 4.872 4.872 0 0010 5.139zm0 1.389A3.462 3.462 0 0113.471 10a3.462 3.462 0 01-3.473 3.472A3.462 3.462 0 016.527 10 3.462 3.462 0 0110 6.528zM1.665 9.305v1.39h2.083v-1.39H1.666zm14.583 0v1.39h2.084v-1.39h-2.084zM5.09 13.928L3.616 15.4l.982.982 1.473-1.473-.982-.982zm9.82 0l-.982.982 1.473 1.473.982-.982-1.473-1.473zM9.305 16.25v2.083h1.389V16.25h-1.39z"/></svg>')`,
+    
+      },
+      '& + .MuiSwitch-track': {
+        opacity: 1,
+        backgroundColor: theme.palette.mode === 'dark' ? '#8796A5' : '#4E5B94',
+      },
+    },
+  },
+
+  '& .MuiSwitch-thumb': {
+    backgroundColor: theme.palette.mode === 'dark' ? '#003892' : '#001e3c',
+    width: 32,
+    height: 32,
+    '&:before': {
+                backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 20 20"><path fill="${encodeURIComponent(
+          '#fff',
+        )}" d="M4.2 2.5l-.7 1.8-1.8.7 1.8.7.7 1.8.6-1.8L6.7 5l-1.9-.7-.6-1.8zm15 8.3a6.7 6.7 0 11-6.6-6.6 5.8 5.8 0 006.6 6.6z"/></svg>')`,
+},
+  },
+  '& .MuiSwitch-track': {
+    opacity: 1,
+    backgroundColor: theme.palette.mode === 'dark' ? '#8796A5' : '#aab4be',
+    borderRadius: 20 / 2,
+  },
+}));
 
 export default function BasicTabs(props:ArticleProps) {
   const {article, handleNoCatalogBaseSelected, currentCatalog, handleCatalogAdded, catalogBaseIdentifiers, allowUpdate, score} = props
@@ -106,24 +154,36 @@ export default function BasicTabs(props:ArticleProps) {
   const [switchChecked, setSwitchChecked] = React.useState<boolean | null>(null);
   const [addedToCatalog, setAddedToCatalog] =  React.useState<boolean | null>(null);
   const [removedFromCatalog, setRemovedFromCatalog] =  React.useState<boolean | null>(null);
-  const [checked, setChecked] = React.useState(false);
+  const [oldCatalog, setOldCatalog] = React.useState("");
+  const [loading, setLoading] = React.useState<boolean>(false);
+  const [finished, setFinished] = React.useState(false);
+
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
+ 
+  React.useEffect(() => {
+    console.log("useEffect")
+  }, [loading])
 
+  React.useEffect(() => {
+    console.log(article)
+    console.log(catalogBaseIdentifiers)
+  }, []) 
+const addPaper = async () => {
+  if (currentCatalog===null){
+    handleNoCatalogBaseSelected()
+    return
+  }
   
-  const handleChangeSwitch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if(!switchChecked){
-      if (currentCatalog===null){
-      handleNoCatalogBaseSelected()
-      return
-    }
-  else{
-    CatalogService.addPaperDOIToBase(currentCatalog, article).then(
+  CatalogService.addPaperDOIToBase(currentCatalog, article).then(
         (response) => {
+        console.log(loading)
         setAddedToCatalog(true);
-        handleCatalogAdded(true)
+        setLoading(false)
+        handleCatalogAdded(true, article)
         setSwitchChecked(true)
+        console.log(switchChecked)
       },
       error => {
         const resMessage =
@@ -133,22 +193,44 @@ export default function BasicTabs(props:ArticleProps) {
           error.message ||
           error.toString();
         setAddedToCatalog(false);
+        setLoading(false)
+
       }
-    );
-  }
-  
-    }
-    else{
+    )
+}
+  const handleChangeSwitch = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if(!switchChecked){
       if (currentCatalog===null){
       handleNoCatalogBaseSelected()
       return
     }
   else{
+    setLoading(true)
+    console.log("addingggg")
+    await addPaper()
+    console.log("ended")
+    console.log(loading)
+
+  }
+  
+    }
+    else{
+      console.log("here")
+      if (currentCatalog===null){
+      handleNoCatalogBaseSelected()
+      return
+    }
+  else{
+    setLoading(true) 
+    console.log("removingggg")
     CatalogService.removePaperDOIFromBase(currentCatalog, article.DOI).then(
         (response) => {
+        console.log("why not here")
         setRemovedFromCatalog(true);
-        handleCatalogAdded(false)
+        setLoading(false)
+        handleCatalogAdded(false, article)
         setSwitchChecked(false)
+        console.log(switchChecked)
       },
       error => {
         const resMessage =
@@ -158,8 +240,10 @@ export default function BasicTabs(props:ArticleProps) {
           error.message ||
           error.toString();
         setRemovedFromCatalog(false);
+        setLoading(false)
       }
     );
+ 
   }
     }
   };
@@ -171,21 +255,54 @@ export default function BasicTabs(props:ArticleProps) {
   }
 }
   const inCatalog = () =>{
-  if(switchChecked!==null){
-    return switchChecked
-  }
-  
+    console.log(switchChecked)
+    console.log(catalogBaseIdentifiers)
+
   if(catalogBaseIdentifiers.find(e => e === article.DOI)){
+    if(switchChecked===true){
+      return switchChecked
+    }
     setSwitchChecked(true)
     return true
   }
   else{
-    setSwitchChecked(false)
+    if(switchChecked===false){
+      return switchChecked
+    }
+   setSwitchChecked(false)
     return false
   }
 }
+  const renderLabel = () => {
+    if (inCatalog()) {
+      return "Remove From Catalog"
+    }
+    else {
+      return "Add To Catalog"
+    }
+  }
   const renderSwitch = () => {
+    console.log("renderSwitch")
+    console.log(loading)
     if (allowUpdate) {
+      if(!loading){
+    return <FormControlLabel
+        style={{marginLeft:'20px'}}
+        control={<LoadingButton  loading={!finished && loading} done={finished} checked={inCatalog()} onChange={handleChangeSwitch}/>}
+        label={''}
+        />
+      }
+      else{
+        return (
+          <div style={{marginLeft:'50px'}}>
+                         <Button>
+        <CircularProgress />
+      </Button>
+             </div>
+
+        )
+      }        
+      
 return <Switch
       checked={inCatalog()}
       onChange={handleChangeSwitch}

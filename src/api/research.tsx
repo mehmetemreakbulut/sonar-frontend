@@ -1,4 +1,12 @@
+import GraphService from '../services/graph.services'
+
+
+
+
 // ----- Wikipedia API functions -----
+
+
+
 export async function searchWikipedia(searchQuery: string): Promise<{ title: string; pageid: number }> {
     const endpoint = `https://en.wikipedia.org/w/api.php?action=query&format=json&list=search&srsearch=${searchQuery}&origin=*`;
 
@@ -41,4 +49,16 @@ export async function getWikipediaLink(pageid: number) {
     }
     const json = await response.json();
     return json.query.pages[pageid].fullurl;
+}
+
+export async function getArticle(DOI:string) {
+
+    const endpoint = `http://localhost:8000/catalog/article/?doi=${DOI}`
+   const response = await fetch(endpoint, );
+    // if request failed, throw an error
+    if (!response.ok) {
+        throw Error(response.statusText);
+    }
+    const json = await response.json();
+    return json
 }

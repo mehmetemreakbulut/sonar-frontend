@@ -1,7 +1,7 @@
 import React, { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import type { IdType } from "vis-network";
 import ContextMenu, { ContextMenuState, ContextMenuType } from "./contextMenu";
-import { WikiSummary } from "./sidebar/researchSummaries";
+import { Summary } from "./sidebar/researchSummaries";
 import styled from "styled-components";
 import { AlertState, AlertType } from "./alert";
 import { VisContext } from "../context/visContext";
@@ -17,9 +17,9 @@ const StyledCanvas = styled.div`
 
 interface Props {
     containerId: string;
-    summaries: WikiSummary[];
-    setSummaries: Dispatch<SetStateAction<WikiSummary[]>>;
-    setCurrentSummary: Dispatch<SetStateAction<WikiSummary | null>>;
+    summaries: Summary[];
+    setSummaries: Dispatch<SetStateAction<Summary[]>>;
+    setCurrentSummary: Dispatch<SetStateAction<Summary | null>>;
     setAlertState: Dispatch<SetStateAction<AlertState>>;
     darkMode: boolean;
 }
@@ -80,8 +80,9 @@ const WikiGraph: React.FC<Props> = ({
         if (!vis || !visNetwork) {
             return;
         }
-
+        
         const updateSelectionState = (nodeIds: IdType[]) => {
+            console.log(nodeIds)
             // update selection
             setSelection(nodeIds);
             selectionRef.current = nodeIds;
@@ -95,6 +96,7 @@ const WikiGraph: React.FC<Props> = ({
                     return label;
                 });
             setSelectionLabels(labels);
+            console.log(labels)
         };
 
         // 1. listener for "select"

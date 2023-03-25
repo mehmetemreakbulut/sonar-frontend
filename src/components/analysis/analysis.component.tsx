@@ -11,9 +11,9 @@ import FileCopyIcon from '@mui/icons-material/FileCopyOutlined';
 import { Button, Chip, FormControl, InputLabel, MenuItem, Pagination, Select, SelectChangeEvent, SpeedDial, SpeedDialAction, SpeedDialIcon, Stack } from "@mui/material";
 import { string } from "yup";
 import BasicTabs from "../articleCard.component";
-import { Home } from "@mui/icons-material";
-import { Article } from "../../services/search.service";
 
+import { Article } from "../../services/search.service";
+import CatalogService, { CatalogBase, CatalogBaseForList } from "../../services/catalog.service";
 
 const actions = [
   { icon: <FileCopyIcon />, name: 'Copy' },
@@ -64,30 +64,44 @@ export default function AnalysisPage() {
 
     const [BetwNode, setBetwNode] = React.useState('');
     const [BetwEdge, setBetwEdge] = React.useState('');
+    const [BetwCatalogBase, setBtwCatalogBase] = React.useState('');
+    const [BetwCatalogExt, setBtwCatalogExt] = React.useState('');
     const [betweennessSchema, setBetweennessSchema] =React.useState<BetweennessData | null>(null);
 
     const [ClosNode, setClosNode] = React.useState('');
     const [ClosEdge, setClosEdge] = React.useState('');
+    const [ClosCatalogBase, setClosCatalogBase] = React.useState('');
+    const [ClosCatalogExt, setClosCatalogExt] = React.useState('');
     const [closenessSchema, setClosenessSchema] =React.useState<BetweennessData | null>(null);
 
     const [EigenNode, setEigenNode] = React.useState('');
     const [EigenEdge, setEigenEdge] = React.useState('');
+    const [EigenCatalogBase, setEigenCatalogBase] = React.useState('');
+    const [EigenCatalogExt, setEigenCatalogExt] = React.useState('');
     const [eigenSchema, setEigenSchema] =React.useState<BetweennessData | null>(null);
 
     const [DegreeNode, setDegreeNode] = React.useState('');
     const [DegreeEdge, setDegreeEdge] = React.useState('');
+    const [DegreeCatalogBase, setDegreeCatalogBase] = React.useState('');
+    const [DegreeCatalogExt, setDegreeCatalogExt] = React.useState('');
     const [DegreeSchema, setDegreeSchema] =React.useState<BetweennessData | null>(null);
 
     const [PagerankNode, setPagerankNode] = React.useState('');
     const [PagerankEdge, setPagerankEdge] = React.useState('');
+    const [PagerankCatalogBase, setPagerankCatalogBase] = React.useState('');
+    const [PagerankCatalogExt, setPagerankCatalogExt] = React.useState('');
     const [PagerankSchema, setPagerankSchema] =React.useState<BetweennessData | null>(null);
 
     const [ArticlerankNode, setArticlerankNode] = React.useState('');
     const [ArticlerankEdge, setArticlerankEdge] = React.useState('');
+    const [ArticlerankCatalogBase, setArticlerankCatalogBase] = React.useState('');
+    const [ArticlerankCatalogExt, setArticlerankCatalogExt] = React.useState('');
     const [ArticlerankSchema, setArticlerankSchema] =React.useState<BetweennessData | null>(null);
 
     const [HarmonicNode, setHarmonicNode] = React.useState('');
     const [HarmonicEdge, setHarmonicEdge] = React.useState('');
+    const [HarmonicCatalogBase, setHarmonicCatalogBase] = React.useState('');
+    const [HarmonicCatalogExt, setHarmonicCatalogExt] = React.useState('');
     const [HarmonicSchema, setHarmonicSchema] =React.useState<BetweennessData | null>(null);
 
 
@@ -99,6 +113,46 @@ export default function AnalysisPage() {
     const [ page5, setPage5 ] = React.useState<number>(1);
     const [ page6, setPage6 ] = React.useState<number>(1);
 
+    const [catalogBases, setcatalogBases] = React.useState<CatalogBaseForList[]>([]);
+    const [catalogExtensions, setcatalogExtension] = React.useState<string[]>([]);
+    const [catalogDupChanged, setCatalogDupChanged] = React.useState<boolean>(false);
+
+        React.useEffect(() => {
+    CatalogService.getAllCatalogBases().then(
+      (response) => {
+        let catalogBases = response.data
+        setcatalogBases(catalogBases)
+      },
+      error => {
+        const resMessage =
+          (error.response &&
+            error.response.data &&
+            error.response.data.error) ||
+          error.message ||
+          error.toString();
+      }
+    );
+  }, [catalogDupChanged])
+
+
+
+      React.useEffect(() => {
+    CatalogService.getAllCatalogBases().then(
+      (response) => {
+        let catalogBases = response.data
+        setcatalogBases(catalogBases)
+      },
+      error => {
+        const resMessage =
+          (error.response &&
+            error.response.data &&
+            error.response.data.error) ||
+          error.message ||
+          error.toString();
+      }
+    );
+  }, [])
+        
     React.useEffect(()=> {
         const currentUser = AuthService.getCurrentUser();
 
@@ -167,9 +221,76 @@ export default function AnalysisPage() {
     } 
     if(value==6){
         setHarmonicEdge(event.target.value as string);
-    }    
-
+    } 
+     
     console.log(ClosEdge)
+  };
+
+
+  const handleCatalogBaseChange = (event: SelectChangeEvent) => {
+    if(value==0){
+        setBtwCatalogBase(event.target.value as string);
+    }  
+    if(value==1){
+        setClosCatalogBase(event.target.value as string);
+    }
+    if(value==2){
+        setEigenCatalogBase(event.target.value as string);
+    } 
+    if(value==3){
+        setDegreeCatalogBase(event.target.value as string);
+    } 
+    if(value==4){
+        setPagerankCatalogBase(event.target.value as string);
+    } 
+    if(value==5){
+        setArticlerankCatalogBase(event.target.value as string);
+    } 
+    if(value==6){
+        setHarmonicCatalogBase(event.target.value as string);
+    } 
+    
+        CatalogService.getCatalogExtensionNames(event.target.value as string).then(
+      (response) => {
+        let catalogExtensions = response.data
+        setcatalogExtension(catalogExtensions)
+        setCatalogDupChanged(true)
+      },
+      error => {
+        const resMessage =
+          (error.response &&
+            error.response.data &&
+            error.response.data.error) ||
+          error.message ||
+          error.toString();
+      }
+    );
+
+  };
+
+    const handleCatalogExtChange = (event: SelectChangeEvent) => {
+    if(value==0){
+        setBtwCatalogExt(event.target.value as string);
+    }  
+    if(value==1){
+        setClosCatalogExt(event.target.value as string);
+    }
+    if(value==2){
+        setEigenCatalogExt(event.target.value as string);
+    } 
+    if(value==3){
+        setDegreeCatalogExt(event.target.value as string);
+    } 
+    if(value==4){
+        setPagerankCatalogExt(event.target.value as string);
+    } 
+    if(value==5){
+        setArticlerankCatalogExt(event.target.value as string);
+    } 
+    if(value==6){
+        setHarmonicCatalogExt(event.target.value as string);
+    } 
+
   };
 
 
@@ -177,47 +298,64 @@ export default function AnalysisPage() {
     let metric;
     let centrality_node_type: string;
     let centrality_edge_type: string;
+    let catalog_base: string;
+    let catalog_extension: string;
     if(value==0){
         metric = "betweenness"
         centrality_node_type=BetwNode
         centrality_edge_type=BetwEdge
+        catalog_base=BetwCatalogBase
+        catalog_extension=BetwCatalogExt
+
     }
     else if(value==1){
         metric = "closeness"
         centrality_node_type=ClosNode
         centrality_edge_type=ClosEdge
+        catalog_base=ClosCatalogBase
+        catalog_extension=ClosCatalogExt
     }
     else if(value==2){
         metric = "eigenvector"
         centrality_node_type=EigenNode
         centrality_edge_type=EigenEdge
+        catalog_base=EigenCatalogBase
+        catalog_extension=EigenCatalogExt
     }
     else if(value==3){
         metric = "degree"
         centrality_node_type=DegreeNode
         centrality_edge_type=DegreeEdge
+        catalog_base=DegreeCatalogBase
+        catalog_extension=DegreeCatalogExt
     }
     else if(value==4){
         metric = "pagerank"
         centrality_node_type=PagerankNode
         centrality_edge_type=PagerankEdge
+        catalog_base=PagerankCatalogBase
+        catalog_extension=PagerankCatalogExt
     }
     else if(value==5){
         metric = "articlerank"
         centrality_node_type=ArticlerankNode
         centrality_edge_type=ArticlerankEdge
+        catalog_base=ArticlerankCatalogBase
+        catalog_extension=ArticlerankCatalogExt
     }
     else if(value==6){
         metric = "harmonic"
         centrality_node_type=HarmonicNode
         centrality_edge_type=HarmonicEdge
+        catalog_base=HarmonicCatalogBase
+        catalog_extension=HarmonicCatalogExt
     }
     else{
         setBetweennessSchema(null)
         return
     }
     
-        AnalyzeService.getCentrality(centrality_node_type, centrality_edge_type, metric).then(
+        AnalyzeService.getCentrality(centrality_node_type, centrality_edge_type, metric, catalog_base, catalog_extension).then(
       (response) => {
         let nodeData;
         if (centrality_node_type == 'Author') {
@@ -228,6 +366,18 @@ export default function AnalysisPage() {
         }
         else {
             let dump: ArticleData[] = response.data
+            for (let i = 0; i < dump.length; i++) {
+                if (dump[i].Article.doi === undefined){
+                    continue   
+                }
+                else{
+                    let d = dump[i].Article.doi?.toString()
+                    if (d === undefined){
+                        continue
+                    }
+                    dump[i].Article.DOI = d
+                }      
+            }
             nodeData = dump
         }
    
@@ -311,6 +461,45 @@ export default function AnalysisPage() {
             return ArticlerankEdge
         case 6:
             return HarmonicEdge
+    }
+  }
+
+    const returnCatalogBasealue = () => {
+    switch(value){
+        case 0:
+            return BetwCatalogBase
+        case 1:
+            return ClosCatalogBase
+        case 2:
+            return EigenCatalogBase
+        case 3:
+            return DegreeCatalogBase
+        case 4:
+            return PagerankCatalogBase
+        case 5:
+            return ArticlerankCatalogBase
+        case 6:
+            return HarmonicCatalogBase
+    }
+  }
+
+
+      const returnCatalogExtensionlue = () => {
+    switch(value){
+        case 0:
+            return BetwCatalogExt
+        case 1:
+            return ClosCatalogExt
+        case 2:
+            return EigenCatalogExt
+        case 3:
+            return DegreeCatalogExt
+        case 4:
+            return PagerankCatalogExt
+        case 5:
+            return ArticlerankCatalogExt
+        case 6:
+            return HarmonicCatalogExt
     }
   }
 
@@ -404,10 +593,11 @@ export default function AnalysisPage() {
         return <div></div>
     }
     
-   return (<div>
+   return (   
+   <div>
                 <Pagination count={nodeData.page_count} page={getPage()} onChange={handlePageChange} style={{marginTop:'20px',marginBottom:'20px'}}/>
                 {nodeData.data.slice((25*(getPage()-1)),(25*getPage())).map((article:any) => (
-                <BasicTabs article={article.Article} key={article.Article.DOI} handleNoCatalogBaseSelected={()=>{}} 
+                <BasicTabs article={article.Article} key={article.Article.doi} handleNoCatalogBaseSelected={()=>{}} 
                 currentCatalog={'noCatalog'} handleCatalogAdded={()=>{}} 
                 catalogBaseIdentifiers={[]} allowUpdate={false} score={returnScore(article)}></BasicTabs>
             ))}
@@ -456,6 +646,7 @@ export default function AnalysisPage() {
         )
         )}
         </Stack>
+        <Button href={author.Author.s2ag_url}><Chip label={'Go to Author'} color='primary' style={{marginTop:'5px'}}/></Button><br/>
 
       <SpeedDial
         ariaLabel="SpeedDial basic example"
@@ -553,8 +744,36 @@ export default function AnalysisPage() {
           label="Edge"
           onChange={handleEdgeChange}
         >
-          <MenuItem value={"Coauthorship"}>Coauthorship</MenuItem>
-          <MenuItem value={"Cites"}>Cites</MenuItem>
+          <MenuItem value={"COAUTHOR_OF"}>COAUTHOR_OF</MenuItem>
+          <MenuItem value={"CITES"}>CITES</MenuItem>
+        </Select>
+      </FormControl>
+    </Box>
+        <Box sx={{ minWidth: 120 }}>
+      <FormControl style={{width:"100px"}} >
+        <InputLabel id="demo-simple-select-label">Catalog Base</InputLabel>
+        <Select
+          labelId="demo-simple-select-label"
+          id="demo-simple-select"
+          value={returnCatalogBasealue()}
+          label="Catalog Base"
+          onChange={handleCatalogBaseChange}
+        >
+        {catalogBases.map(v =><MenuItem value={v.catalog_base_name}>{v.catalog_base_name}</MenuItem> )}
+        </Select>
+      </FormControl>
+    </Box>
+            <Box sx={{ minWidth: 120 }}>
+      <FormControl style={{width:"100px"}} >
+        <InputLabel id="demo-simple-select-label">Catalog Extension</InputLabel>
+        <Select
+          labelId="demo-simple-select-label"
+          id="demo-simple-select"
+          value={returnCatalogExtensionlue()}
+          label="Catalog Extension"
+          onChange={handleCatalogExtChange}
+        >
+          {catalogExtensions.map(v =><MenuItem value={v}>{v}</MenuItem> )}
         </Select>
       </FormControl>
     </Box>

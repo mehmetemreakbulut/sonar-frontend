@@ -136,9 +136,9 @@ export default function EditExtensionComponent(){
       <div>
     
     <Box
-     sx={{ width: 120 || false ? 'auto' : 250 }}
+     sx={{ width:650 }}
       role="presentation"
-      onClick={toggleDrawer(anchor, false)}
+      onClick={toggleDrawer(anchor, true)}
       onKeyDown={toggleDrawer(anchor, false)}
     >
 
@@ -160,8 +160,8 @@ export default function EditExtensionComponent(){
             return <div></div>
         }
         else {
+          console.log(catalogBase)
             return <div >
-
                 <div>
       {(['See Catalog Base'] as const).map((anchor) => (
       

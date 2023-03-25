@@ -4,7 +4,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
-import CatalogService, { CatalogBase } from "../services/catalog.service"
+import CatalogService, { CatalogBase, CatalogBaseForList } from "../services/catalog.service"
 
 
 
@@ -13,7 +13,7 @@ export default function CatalogBaseMenu(props:any) {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [selectedIndex, setSelectedIndex] = React.useState<null | number>(null);
   const [options, setOptions] = React.useState<string[]>([]);
-  const [catalogBase, setcatalogBase] = React.useState<CatalogBase[]>([]);
+  const [catalogBase, setcatalogBase] = React.useState<CatalogBaseForList[]>([]);
   const open = Boolean(anchorEl);
 
   React.useEffect(() => {
@@ -21,7 +21,7 @@ export default function CatalogBaseMenu(props:any) {
       (response) => {
         let catalogBases = response.data
         setcatalogBase(catalogBases)
-        setOptions(catalogBases.map(v => v.catalog_name))
+        setOptions(catalogBases.map(v => v.catalog_base_name))
       },
       error => {
         const resMessage =
@@ -33,7 +33,8 @@ export default function CatalogBaseMenu(props:any) {
       }
     );
   }, [])
-  
+
+ 
   const handleClickListItem = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
     console.log(options)
@@ -77,7 +78,7 @@ export default function CatalogBaseMenu(props:any) {
           onClick={handleClickListItem}
         >
           <ListItemText
-            primary="When device is locked"
+            primary="Please choose a Catalog"
             secondary= {showSelected()}
           />
         </ListItem>

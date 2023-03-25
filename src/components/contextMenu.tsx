@@ -2,10 +2,10 @@ import html2canvas from "html2canvas";
 import { Node } from "neovis.js";
 import type { IdType } from "vis-network";
 import React, { Dispatch, SetStateAction } from "react";
-import { getWikipediaExtract, getWikipediaLink, searchWikipedia } from "../api/research";
-import { WikiSummary } from "./sidebar/researchSummaries";
+import { getArticle, getWikipediaExtract, getWikipediaLink, searchWikipedia } from "../api/research";
+import { ArticleSummary, Summary } from "./sidebar/researchSummaries";
 import { Vis, VisNetwork } from "../api/vis/vis";
-
+import GraphService from "../services/graph.services"
 export enum ContextMenuType {
     Node,
     Nodes,
@@ -30,9 +30,9 @@ interface Props {
     setSelection: Dispatch<SetStateAction<IdType[]>>;
     selectionLabels: string[];
     setSelectionLabels: Dispatch<SetStateAction<string[]>>;
-    summaries: WikiSummary[];
-    setSummaries: Dispatch<SetStateAction<WikiSummary[]>>;
-    setCurrentSummary: Dispatch<SetStateAction<WikiSummary | null>>;
+    summaries: Summary[];
+    setSummaries: Dispatch<SetStateAction<Summary[]>>;
+    setCurrentSummary: Dispatch<SetStateAction<Summary | null>>;
 }
 
 const ContextMenu: React.FC<Props> = ({
@@ -90,22 +90,54 @@ const ContextMenu: React.FC<Props> = ({
 
     // ----- event handler for "Load summaries from Wikipedia" context menu selection -----
     const handleLoadSummary = async () => {
-        var s: WikiSummary[] = [...summaries];
+        var s: Summary[] = [...summaries];
+        console.log(selectionLabels)
         await Promise.all(
+
             selectionLabels.map(async (label) => {
                 // only get the summary if it is not already loaded
-                if (s.filter((summary) => summary.title === label).length === 0) {
-                    const result = await searchWikipedia(label);
-                    const summary = {
-                        title: result.title,
-                        text: await getWikipediaExtract(result.pageid),
-                        link: await getWikipediaLink(result.pageid),
+                console.log(label)
+                if (s.filter((summary) => summary.summary?.doi === label).length === 0) {
+                    console.log(label)
+                    GraphService.getArticle(label).then(
+                    (response) => {
+                        let dump = response.data[0]
+             
+                        console.log(dump)
+                        const sum :ArticleSummary = {
+                        summary_type : 'Article',
+                        id : dump.year,
+                        doi: dump.DOI,
+                        abstract:dump.title,
+                        authors: dump.authors,
+                        citation_count: dump.citation_count,
+                        fields_of_study: dump.fields_of_study,
+                        publication_date: dump.publication_date,
+                        publication_types: dump.publication_types,
+                        reference_count: dump.reference_count,
+                        title:  dump.title,
+                        year: dump.year
+                    }
+                    const summary : Summary = {
+                        summary: sum
+                        
                     };
                     // if it is the first summary generated so far, set it to the current summary
                     if (s.length === 0) {
                         setCurrentSummary(summary);
                     }
                     s.unshift(summary);
+                    },
+                    error => {
+                        const resMessage =
+                        (error.response &&
+                            error.response.data &&
+                            error.response.data.error) ||
+                        error.message ||
+                        error.toString();
+                    }
+                    );
+                    
                 }
             })
         );

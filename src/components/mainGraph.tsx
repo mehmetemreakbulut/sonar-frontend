@@ -1,7 +1,7 @@
 
 import WikiGraph from "./researchGraph";
 import { useEffect, useState } from "react";
-import { WikiSummary } from "./sidebar/researchSummaries";
+import { Summary } from "./sidebar/researchSummaries";
 import Sidebar from "./sidebar";
 import { VisNetwork, Vis, visLoader } from "../api/vis/vis";
 import { VisContext } from "../context/visContext";
@@ -75,8 +75,8 @@ function MainGraph() {
 
     // keep track of summaries
     // TODO: combine into one object
-    const [summaries, setSummaries] = useState<WikiSummary[]>([]);
-    const [currentSummary, setCurrentSummary] = useState<WikiSummary | null>(null);
+    const [summaries, setSummaries] = useState<Summary[]>([]);
+    const [currentSummary, setCurrentSummary] = useState<Summary | null>(null);
 
     // keep track of search bar input
     const [input, setInput] = useState("");

@@ -59,12 +59,12 @@ export const createConfig = (
         },
         // node and edge settings
         labels: { 
-            Article: { label: "title", value: "clicksInto", color:"#ffebee", },
+            Article: { label: "doi", value: "clicksInto", color:"#ffebee", },
             Author: { label: "name", value: "clicksInto" },
      },
         relationships: { 
-            Cites: { value: "quantity" },
-            Author_of: { value: "quantity" } },
+            CITES: { value: "quantity" },
+            AUTHORED_BY: { value: "quantity" } },
         initialCypher:
             "MATCH (n)-[r]->(m) RETURN n,r,m;",
     };

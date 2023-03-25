@@ -7,8 +7,8 @@ const API_URL = 'http://localhost:8000/analyze/';
 
 class AnalyzeService {
 
-    getCentrality(node_type:string, edge_type:string, metric: string){
-        return axios.get(API_URL + 'centrality/'+metric+'/?node_type='+node_type+'&edge_type='+edge_type, { headers: authHeader() })
+    getCentrality(node_type:string, edge_type:string, metric: string, catalog_base_name:string, catalog_extension_name:string){
+        return axios.get(API_URL + 'centrality/'+metric+'/?node_type='+node_type+'&edge_type='+edge_type+'&catalog_base_name='+catalog_base_name+'&catalog_extension_name='+catalog_extension_name, { headers: authHeader() })
     }
 
 }

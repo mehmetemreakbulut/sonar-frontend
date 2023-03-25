@@ -1,12 +1,13 @@
 import * as React from 'react';
 import { Article, Author } from '../services/search.service';
-import { Chip, Stack, Box, Typography, Tab,Tabs, Button, SpeedDial, SpeedDialIcon, SpeedDialAction, speedDialActionClasses, Switch } from '@mui/material';
+import { Chip, Stack, Box, Typography, Tab,Tabs, Button, SpeedDial, SpeedDialIcon, SpeedDialAction, speedDialActionClasses, Switch, FormControlLabel, styled, CircularProgress } from '@mui/material';
 import FaceIcon from '@mui/icons-material/Face';
 import AddIcon from '@mui/icons-material/Add';
 import InsertInvitationIcon from '@mui/icons-material/InsertInvitation';
 import FileCopyIcon from '@mui/icons-material/FileCopyOutlined';
 
 import CatalogService, { ArticleIdentifier } from '../services/catalog.service'
+import LoadingButton from './loadingButton.component';
 
 type TabPanelProps= {
   children?: React.ReactNode;
@@ -50,10 +51,12 @@ function getFieldsOfStudy(fields: string[]){
     )
     )
   }
-function getAuthors(authors: Author[]){
+function getAuthors(authors: any[]){
+   
     if(authors ===null){
         return <div></div>
     }
+    
     return authors.map((author) => (
         <Chip icon={<FaceIcon />} label={author.author_name} variant="outlined" key={author.author_id}/>
     )
@@ -96,10 +99,15 @@ export default function ExtensionCard(props:ArticleProps) {
   const [addedToCatalog, setAddedToCatalog] =  React.useState<boolean | null>(null);
   const [removedFromCatalog, setRemovedFromCatalog] =  React.useState<boolean | null>(null);
   const [checked, setChecked] = React.useState(false);
+  const [loading, setLoading] = React.useState<boolean>(false);
+  const [finished, setFinished] = React.useState(false);
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
 
+    React.useEffect(() => {
+    console.log("useEffect")
+  }, [loading])
   
   const handleChangeSwitch = (event: React.ChangeEvent<HTMLInputElement>) => {
     console.log("test")
@@ -109,10 +117,12 @@ export default function ExtensionCard(props:ArticleProps) {
       return
     }
   else{
+    setLoading(true)
     CatalogService.addPaperDOIToExtension(currentCatalog, currentExtension, article).then(
         (response) => {
         console.log("HERE")
         setAddedToCatalog(true);
+        setLoading(false)
         handleCatalogAdded(true)
         setSwitchChecked(true)
       },
@@ -124,6 +134,7 @@ export default function ExtensionCard(props:ArticleProps) {
           error.message ||
           error.toString();
         setAddedToCatalog(false);
+        setLoading(false)
       }
     ); 
   }
@@ -135,11 +146,13 @@ export default function ExtensionCard(props:ArticleProps) {
       return
     }
   else{
+    setLoading(true)
     CatalogService.removePaperDOIFromExtension(currentCatalog,currentExtension, article.DOI).then(
         (response) => {
           console.log('removing')
         setRemovedFromCatalog(true);
         handleCatalogAdded(false)
+        setLoading(false)
         setSwitchChecked(false)
       },
       error => {
@@ -150,6 +163,7 @@ export default function ExtensionCard(props:ArticleProps) {
           error.message ||
           error.toString();
         setRemovedFromCatalog(false);
+        setLoading(false)
       }
     );
   }
@@ -176,6 +190,35 @@ export default function ExtensionCard(props:ArticleProps) {
     return false
   }
 }
+  console.log(article)
+
+  const renderLabel = () => {
+    if (inCatalog()) {
+      return "Remove From Catalog Extension"
+    }
+    else {
+      return "Add To Catalog Extension"
+    }
+  }
+  const renderButton = () => {
+          if(!loading){
+    return (<FormControlLabel
+        style={{marginLeft:'20px'}}
+        control={<LoadingButton  loading={!finished && loading} done={finished} checked={inCatalog()} onChange={handleChangeSwitch}/>}
+        label={''}
+        />)
+      }
+            else{
+        return (
+          <div style={{marginLeft:'50px'}}>
+                         <Button>
+        <CircularProgress />
+      </Button>
+             </div>
+
+        )
+      }  
+    } 
   return (
     <Box sx={{ width: '100%', transform: 'translateZ(0px)', flexGrow: 1 }}> 
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
@@ -221,11 +264,9 @@ export default function ExtensionCard(props:ArticleProps) {
           />
         ))}
       </SpeedDial>
-      <Switch
-      checked={inCatalog()}
-      onChange={handleChangeSwitch}
-      inputProps={{ 'aria-label': 'controlled' }}
-      />
+
+
+    
   
     </Box>
   );

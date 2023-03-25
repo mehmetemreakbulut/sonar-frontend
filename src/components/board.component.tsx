@@ -5,9 +5,10 @@ import UserService from "../services/user.service";
 import SearchService from "../services/search.service"
 import {SearchResult, Article } from "../services/search.service"
 import BasicTabs from "./articleCard.component";
-import { Alert, Pagination, Snackbar } from "@mui/material";
+import { Alert, Card, CardContent, makeStyles, Pagination, Snackbar, Typography } from "@mui/material";
 import CatalogBaseMenu from "./catalogBaseList.component";
-import catalogService, { CatalogBase, ArticleIdentifier } from "../services/catalog.service";
+import CatalogService, { CatalogBase, ArticleIdentifier } from "../services/catalog.service";
+
 
 type Props = {};
 
@@ -22,8 +23,9 @@ type State = {
   openAlert: boolean
   catalogBaseAdded: boolean
   catalogBaseRemoved: boolean
-  catalogBaseIdentifiers: ArticleIdentifier[]
+  catalogBaseIdentifiers: string[]
 }
+
 
 
 export default class BoardUser extends Component<Props, State> {
@@ -65,9 +67,22 @@ export default class BoardUser extends Component<Props, State> {
     );
   } */
 
-  handleCatalogSelection = (catalog_name:string, catalog_base:CatalogBase) => {
+  handleCatalogSelection = (catalog_name:string, catalog_base:any) => {
     this.setState({currentCatalog:catalog_name})
-    this.setState({catalogBaseIdentifiers: catalog_base.article_identifiers})
+    CatalogService.getCatalogBase(catalog_name).then(
+      (response) => {
+        this.setState({catalogBaseIdentifiers: response.data})
+      },
+      error => {
+        const resMessage =
+          (error.response &&
+            error.response.data &&
+            error.response.data.error) ||
+            error.message ||
+            error.toString();
+      }
+    );
+    
   }
 
   handleNoCatalogBaseSelected = () => {
@@ -122,9 +137,13 @@ export default class BoardUser extends Component<Props, State> {
     
     return (
       <div className="container">
-        <div className="input-group">
-          <input type="search" className="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" onChange={this.onSearchInputChange}/>
-          <button type="button" className="btn btn-outline-primary" onClick={this.handleSearch}>search</button>
+  
+        <div className="input-group mb-3" >
+          <input type="text" className="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="basic-addon" style={{border:"1px solid blue"}} onChange={this.onSearchInputChange}/>
+          <div className="input-group-append">
+            <button type="button" className="btn btn-outline-primary" aria-describedby="button-addon" style={{display:"inline-block",textAlign:"center"}} onClick={this.handleSearch}>search</button>
+          </div>
+          
         </div>
         <header className="jumbotron">
           {this.formatContent()}
@@ -143,21 +162,45 @@ export default class BoardUser extends Component<Props, State> {
     );
   }
 
-  handleCatalogAdded = (added:boolean) => {
+  handleCatalogAdded = (added:boolean, article:Article) => {
     if(added){
     this.setState({catalogBaseRemoved:false})
     this.setState({catalogBaseAdded:true})
+    let dump = this.state.catalogBaseIdentifiers
+    let identifier: string = article.DOI
+    dump.push(identifier)
+    this.setState({catalogBaseIdentifiers: dump})
+
     }
     else{
       this.setState({catalogBaseRemoved:true})
       this.setState({catalogBaseAdded:false})
+      let arr = this.state.catalogBaseIdentifiers.filter(function(item) {
+      return item !== article.DOI
+      })
+      console.log(arr)
+      this.setState({catalogBaseIdentifiers: arr})
     }
-  }
+    }
   formatContent(){
     const { content, page } = this.state;
    
     if(content===null){
-      return <div></div>
+     
+      return <div>
+        <Card style={{minWidth:"275"}}>
+      <CardContent>
+        <Typography variant="h5" component="h2">
+          Explore the world of science
+        </Typography>
+        <Typography style={{marginBottom:"12"}} color="textSecondary">
+          Search for articles and add them to your catalog base. To start, enter a search term in the search bar above.
+        </Typography>
+  
+      </CardContent>
+  
+    </Card>
+      </div>
     }
     const articles: Article[] = [];
     for (var article of content.search_results) {
@@ -167,7 +210,7 @@ export default class BoardUser extends Component<Props, State> {
       <Pagination count={content.total_page_count} page={page} onChange={this.handlePageChange} style={{marginTop:'20px',marginBottom:'20px'}}/>
       <CatalogBaseMenu handleCatalogSelection={this.handleCatalogSelection}/>
       {articles.map((article) => (
-        <BasicTabs article={article} key={article.DOI} handleNoCatalogBaseSelected={this.handleNoCatalogBaseSelected} currentCatalog={this.state.currentCatalog} handleCatalogAdded={this.handleCatalogAdded} catalogBaseIdentifiers={this.state.catalogBaseIdentifiers.map(v => v.DOI)} allowUpdate={true}></BasicTabs>
+        <BasicTabs article={article} key={article.DOI} handleNoCatalogBaseSelected={this.handleNoCatalogBaseSelected} currentCatalog={this.state.currentCatalog} handleCatalogAdded={this.handleCatalogAdded} catalogBaseIdentifiers={this.state.catalogBaseIdentifiers.map(v => v)} allowUpdate={true}></BasicTabs>
       ))}
       {this.state.noCurrentCatalog ? <Snackbar open={this.state.openAlert} autoHideDuration={6000} onClose={this.handleClose}>
         <Alert onClose={this.handleClose} severity="error" sx={{ width: '100%' }}>

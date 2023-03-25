@@ -8,6 +8,7 @@ export type Author = {
 } 
 export type Article = {
   DOI: string;
+  doi?: string;
   abstract: string;
   authors: Author[];
   citation_count: number;

@@ -20,6 +20,11 @@ export type CatalogBase = {
     owner: Owner
 }
 
+export type CatalogBaseForList = {
+    catalog_base_name:string
+    article_count: number
+}
+
 export type CatalogExtension = {
     catalog_extension_name: string
     catalog_base:CatalogBase
@@ -32,66 +37,68 @@ export type AuthorPage = {
     page_count : number
 }
 
+
+
+
 export type ArticlePage = {
     articles : Article[]
     total_count : number
     page_count : number
 }
+
+export type CatalogBaseListEntity = {
+    catalog_name:string
+    article_count: number
+}
 class CatalogService {
     
     getCatalogBase(catalog_name: string){
         
-        return axios.get<CatalogBase>(API_URL + 'base/?catalog_name='+catalog_name, { headers: authHeader() })
+        return axios.get<string[]>(API_URL + 'base/?catalog_base_name='+catalog_name, { headers: authHeader() })
     }
     getCatalogExtension(catalog_name: string, catalog_extension_id:string){
-        return axios.get<CatalogExtension>(API_URL + 'extension/?catalog_name='+catalog_name+'&catalog_extension_name='+catalog_extension_id, { headers: authHeader() })
+        return axios.get<string[]>(API_URL + 'extension/?catalog_name='+catalog_name+'&catalog_extension_name='+catalog_extension_id, { headers: authHeader() })
     }
     
     getCatalogBaseArticles(catalog_name: string,  offset:string){
-        return axios.get<ArticlePage>(API_URL + 'base/articles/?catalog_name='+catalog_name+'&offset='+offset, { headers: authHeader() })
+        return axios.get<ArticlePage>(API_URL + 'base/articles/?catalog_base_name='+catalog_name+'&offset='+offset, { headers: authHeader() })
     }
 
     getCatalogExtensionArticles(catalog_name: string, catalog_extension_id:string, offset:string){
-        return axios.get<ArticlePage>(API_URL + 'extension/articles/?catalog_name='+catalog_name+'&catalog_extension_name='+catalog_extension_id+'&offset='+offset, { headers: authHeader() })
+        return axios.get<ArticlePage>(API_URL + 'extension/articles/?catalog_base_name='+catalog_name+'&catalog_extension_name='+catalog_extension_id+'&offset='+offset, { headers: authHeader() })
     }
     createCatalogBase(catalog_name: string) {
     var bodyFormData = new FormData();
-    bodyFormData.append('catalog_name', catalog_name);
+    bodyFormData.append('catalog_base_name', catalog_name);
     return axios.post(API_URL + 'base/',bodyFormData, { headers: authHeader() });
     }
 
     createCatalogExtension(catalog_name: string, catalog_extension_name:string) {
-    return axios.post(API_URL + 'extension/',{catalog_name, catalog_extension_name}, { headers: authHeader() });
+    var bodyFormData = new FormData();
+    bodyFormData.append('catalog_base_name', catalog_name);
+    bodyFormData.append('catalog_extension_name', catalog_extension_name);
+    return axios.post(API_URL + 'extension/',bodyFormData, { headers: authHeader() });
     }
 
     getAllCatalogBases() {
         console.log(authHeader())
-        return axios.get<CatalogBase[]>(API_URL + 'base/all/', { headers: authHeader() });
+        return axios.get<CatalogBaseForList[]>(API_URL + 'base/all/', { headers: authHeader() });
     }
 
     getCatalogExtensions(catalog_name: string) {
-        return axios.get<CatalogExtension[]>(API_URL + 'extension/all/?catalog_name='+catalog_name, { headers: authHeader() });
+        return axios.get<string[]>(API_URL + 'extension/all/?catalog_base_name='+catalog_name, { headers: authHeader() });
     }
 
     getCatalogExtensionNames(catalog_name: string) {
-        return axios.get<string[]>(API_URL + 'extension/names/?catalog_name='+catalog_name, { headers: authHeader() });
+        return axios.get<string[]>(API_URL + 'extension/names/?catalog_base_name='+catalog_name, { headers: authHeader() });
     }
 
     addPaperDOIToBase(catalog_name: string,article: Article) {
         
         const data = {
-            catalog_name: catalog_name,
-            edit_type: "add_paper_doi",
-            paper_doi: article.DOI,
-            title: article.title,
-            abstract: article.abstract,
-            year: article.year,
-            citation_count: article.citation_count,
-            reference_count: article.reference_count,
-            fields_of_study: article.fields_of_study,
-            publication_types: article.publication_types,
-            publication_date: article.publication_date,
-            authors: article.authors
+            catalog_base_name: catalog_name,
+            edit_type: "add_article",
+            article_doi: article.DOI,
 
         }
         return axios.put(API_URL + 'base/', data, { headers: authHeader() });
@@ -100,9 +107,9 @@ class CatalogService {
     removePaperDOIFromBase(catalog_name: string, paper_doi: string) {
         
         const data = {
-            catalog_name: catalog_name,
-            edit_type: "remove_paper_doi",
-            paper_doi: paper_doi
+            catalog_base_name: catalog_name,
+            edit_type: "remove_article",
+            article_doi: paper_doi
         }
         return axios.put(API_URL + 'base/', data, { headers: authHeader() });
     }
@@ -113,22 +120,12 @@ class CatalogService {
             catalog_name: catalog_name,
             catalog_extension_name:catalog_extension_name,
             edit_type: "add_s2ag_paper_id",
-            paper_doi: article.DOI,
-            title: article.title,
-            abstract: article.abstract,
-            year: article.year,
-            citation_count: article.citation_count,
-            reference_count: article.reference_count,
-            fields_of_study: article.fields_of_study,
-            publication_types: article.publication_types,
-            publication_date: article.publication_date,
-            authors: article.authors
-
+            article_doi: article.DOI,
         }
         return axios.put(API_URL + 'extension/', data, { headers: authHeader() });
     }
 
-    removePaperDOIFromExtension(catalog_name: string, catalog_extension_name:string, paper_doi: string) {
+    removePaperDOIFromExtension(catalog_name: string, catalog_extension_name:string, paper_doi?: string) {
         
         const data = {
             catalog_name: catalog_name,
@@ -142,7 +139,7 @@ class CatalogService {
     addInbound(catalog_name: string, catalog_extension_name:string) {
         
         const data = {
-            catalog_name: catalog_name,
+            catalog_base_name: catalog_name,
             catalog_extension_name:catalog_extension_name,
             edit_type: "add_inbound_s2ag_citations",
         }
@@ -152,7 +149,7 @@ class CatalogService {
     addOutbound(catalog_name: string, catalog_extension_name:string) {
         console.log("hee")
         const data = {
-            catalog_name: catalog_name,
+            catalog_base_name: catalog_name,
             catalog_extension_name:catalog_extension_name,
             edit_type: "add_outbound_s2ag_citations",
         }

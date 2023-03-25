@@ -49,7 +49,7 @@ export default function SimpleListMenu() {
           onClick={handleClickListItem}
         >
           <ListItemText
-            primary="When device is locked"
+            primary="Please choose a Catalog"
             secondary={options[selectedIndex]}
           />
         </ListItem>
@@ -76,5 +76,6 @@ export default function SimpleListMenu() {
         ))}
       </Menu>
     </div>
+
   );
 }
