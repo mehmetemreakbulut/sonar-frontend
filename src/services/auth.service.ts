@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:8000/authmngr/";
+const API_URL = "http://18.185.240.197:8000/authmngr/";
 
 class AuthService {
   login(username: string, password: string) {

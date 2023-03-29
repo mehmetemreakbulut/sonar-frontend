@@ -53,7 +53,7 @@ export async function getWikipediaLink(pageid: number) {
 
 export async function getArticle(DOI:string) {
 
-    const endpoint = `http://localhost:8000/catalog/article/?doi=${DOI}`
+    const endpoint = `http://18.185.240.197:8000/catalog/article/?doi=${DOI}`
    const response = await fetch(endpoint, );
     // if request failed, throw an error
     if (!response.ok) {

@@ -2,7 +2,7 @@ import axios from 'axios';
 import authHeader from './authHeader';
 import { Article, Author } from './search.service';
 
-const API_URL = 'http://localhost:8000/catalog/';
+const API_URL = 'http://18.185.240.197:8000/catalog/';
 
 class GraphService {
   
