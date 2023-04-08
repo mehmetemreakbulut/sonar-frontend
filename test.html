@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    
+    <script src="http://code.jquery.com/jquery-2.0.3.min.js" data-semver="2.0.3" data-require="jquery"></script>
+    <script src="https://rawgit.com/neo4j-contrib/neovis.js/master/dist/neovis.js"></script>
+    <script type="text/javascript">
+        function draw() {
+            alert("inside method");
+            var viz;
+            var config = {
+                container_id: "viz",
+                serverUrl: "bolt://localhost:7687",
+                serverUser: "neo4j",
+                serverPassword: "6BqHvht5",
+                labels: {
+
+                },
+                relationships: {
+
+                },
+                initial_cypher: "MATCH (n:Article) RETURN n LIMIT 1"
+            },
+
+                viz = new NeoVis.default(config);
+            console.log(JSON.stringify(viz));
+            viz.render();
+        };
+    </script>
+</head>
+
+<body>
+    <div>
+        <div id="row2">
+            <input type="button" value="click" onclick="draw()">
+            <div id="viz"></div>
+        </div>
+        </form>
+    </div>
+</body>
+
+</html>
